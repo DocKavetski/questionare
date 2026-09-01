@@ -1,0 +1,8 @@
+node_modules/
+dist/
+_extract/
+_*.py
+_recs.txt
+.DS_Store
+Thumbs.db
+*.local
