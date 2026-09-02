@@ -19,6 +19,12 @@ export function buildSummary(state) {
   if (fv("last_coitus")) lines.push("Последний коитус: " + fv("last_coitus"));
   const visitChips = sel("visit_prob", visitFocus(female));
   if (visitChips.length) lines.push("Фокус визита: " + visitChips.join(", "));
+  const symActive = Object.keys(state.checks).filter((k) => k.startsWith("sym:") && state.checks[k]).map((k) => k.slice(4));
+  if (symActive.length) lines.push("Симптомы (интервью): " + symActive.join(", "));
+  const iief = ["iief1", "iief2", "iief3", "iief4", "iief5"].map((id) => Number(fv(id))).filter((n) => n > 0);
+  if (iief.length === 5) lines.push("IIEF-5: " + iief.reduce((a, b) => a + b, 0));
+  const pedt = ["pedt1", "pedt2", "pedt3", "pedt4", "pedt5"].map((id) => Number(fv(id))).filter((n) => !Number.isNaN(n) && fv(id) !== "");
+  if (pedt.length === 5) lines.push("PEDT: " + pedt.reduce((a, b) => a + b, 0));
   if (!female) {
     const er = sel("erect_coitus", ["быстрой возбудимости", "средней", "медленной", "полные", "неполные", "неполные ослабленные", "отсутствуют"]);
     if (er.length) lines.push("Эрекции при коитусе: " + er.join(", "));

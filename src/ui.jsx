@@ -51,12 +51,13 @@ export function Chips({ prefix, opts }) {
   );
 }
 
-export function Scale({ id, max = 4 }) {
+export function Scale({ id, max = 4, min = 1 }) {
   useStore();
   const cur = String(f(id));
+  const nums = Array.from({ length: max - min + 1 }, (_, i) => i + min);
   return (
     <div className="scale">
-      {Array.from({ length: max }, (_, i) => i + 1).map((n) => (
+      {nums.map((n) => (
         <label key={n} className={cur === String(n) ? "on" : ""}>
           <input
             type="radio"

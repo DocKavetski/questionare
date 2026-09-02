@@ -224,6 +224,11 @@ input.mini { width: 92px; display: inline-block; }
   background: rgba(255,255,255,.16); border-radius: 99px; padding: 6px 10px;
   font-size: 12px; font-weight: 700; min-width: 44px; text-align: center;
 }
+.score-box {
+  background: var(--gold-soft); border-radius: 12px; padding: 10px 14px;
+  font-size: 14px; margin-top: 8px;
+}
+.scale-section h2 { font-family: var(--serif); font-size: 22px; margin: 18px 0 10px; }
 
 @media (max-width: 700px) {
   .card-progress-hero { grid-template-columns: 1fr; }
