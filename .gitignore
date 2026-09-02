@@ -1,8 +1,17 @@
+# dependencies
 node_modules/
+
+# build
 dist/
-_extract/
-_*.py
-_recs.txt
+
+# local / OS
 .DS_Store
 Thumbs.db
 *.local
+.vscode/
+.idea/
+
+# legacy scratch
+_extract/
+_*.py
+_recs.txt
