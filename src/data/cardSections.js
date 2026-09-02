@@ -183,15 +183,14 @@ export function sectionProgress(state, section) {
     total++;
     if (fieldFilled(state, id)) filled++;
   });
-  (p.chips || []).forEach((prefix) => {
-    if (typeof prefix === "string") {
+  if (Array.isArray(p.chips)) {
+    p.chips.forEach((prefix) => {
       total++;
       if (chipFilled(state, prefix)) filled++;
-    }
-  });
-  if (p.chips && typeof p.chips === "object" && !Array.isArray(p.chips)) {
+    });
+  } else if (p.chips && typeof p.chips === "object") {
     const list = female ? p.chips.f : p.chips.m;
-    list.forEach((prefix) => {
+    (list || []).forEach((prefix) => {
       total++;
       if (chipFilled(state, prefix)) filled++;
     });
