@@ -1,6 +1,14 @@
-/** Structural diagnosis axes (Васильченко / бланк) */
+/** Structural diagnosis axes */
 
 export function structureAxes(sex) {
+  if (sex === "c") {
+    return [
+      { id: "him", title: "I. Его составляющая", hint: "эрекция, эякуляция, желание, соматика, АД" },
+      { id: "her", title: "II. Её составляющая", hint: "желание, возбуждение, боль, оргазм, соматика" },
+      { id: "dyad", title: "III. Диадическая", hint: "коммуникация, конфликт, сценарий, власть" },
+      { id: "context", title: "IV. Контекст", hint: "условия, дети, ритм жизни, культура" },
+    ];
+  }
   if (sex === "f") {
     return [
       { id: "neuro", title: "I. Нейрогуморальная", hint: "гормоны, цикл, климакс, конституция, соматика, лекарства" },
@@ -18,11 +26,18 @@ export function structureAxes(sex) {
 
 export const PLACE = ["ведущая", "сопутствующая", "следствие"];
 
-/** Soft hints which axes may be primary given domains */
 export function suggestLeadingAxes(sex, domains, refinements) {
   const d = new Set(domains);
   const r = new Set(refinements);
   const tips = [];
+  if (sex === "c") {
+    if (d.has("m_symptom") || r.has("m_ed") || r.has("m_pe")) tips.push("him");
+    if (d.has("f_symptom") || r.has("f_pain") || r.has("f_lub")) tips.push("her");
+    if (d.has("conflict") || d.has("desire_gap") || d.has("sex_script")) tips.push("dyad");
+    if (d.has("conditions")) tips.push("context");
+    if (d.has("who") && !tips.length) tips.push("dyad");
+    return [...new Set(tips)];
+  }
   if (d.has("iatrogenic") || r.has("ssri") || r.has("coc")) tips.push("neuro");
   if (d.has("desire") && !d.has("erection")) tips.push("neuro", "psych");
   if (d.has("erection") && (r.has("situational") || r.has("partner_only"))) tips.push("psych", "erect");

@@ -121,22 +121,97 @@ export const MODULES = [
   {
     id: "risk",
     title: "Риск",
-    domains: ["iatrogenic", "desire", "pain"],
+    domains: ["iatrogenic", "desire", "pain", "conflict"],
     items: [
       { kind: "chips", prefix: "sui", label: "Суицидальный риск", opts: ["мыслей нет", "мысли", "замысел", "намерение"] },
       { kind: "text", id: "sui_note", label: "Если есть — подробно", area: true },
       { kind: "text", id: "trauma", label: "Травматический опыт", area: true },
     ],
   },
+  {
+    id: "couple_who",
+    title: "Кто в кабинете и с чем",
+    sex: "c",
+    domains: ["who"],
+    items: [
+      { kind: "chips", prefix: "come_c", label: "Как пришли", opts: ["оба по согласию", "он настоял", "она настояла", "по направлению"] },
+      { kind: "text", id: "complaint_him", label: "Его формулировка", area: true },
+      { kind: "text", id: "complaint_her", label: "Её формулировка", area: true },
+    ],
+  },
+  {
+    id: "couple_desire",
+    title: "Расхождение желания",
+    sex: "c",
+    domains: ["desire_gap"],
+    items: [
+      { kind: "text", id: "freq_he", label: "Желаемая частота — он", mini: true },
+      { kind: "text", id: "freq_she", label: "Желаемая частота — она", mini: true },
+      { kind: "chips", prefix: "gap_feel", label: "Реакция на разрыв", opts: ["обида", "стыд", "гнев", "избегание", "компромисс"] },
+      { kind: "text", id: "gap_note", label: "Как это проживается", area: true },
+    ],
+  },
+  {
+    id: "couple_m",
+    title: "Симптом у него",
+    sex: "c",
+    domains: ["m_symptom"],
+    items: [
+      { kind: "chips", prefix: "c_erect", label: "Эрекция", opts: ["полные", "неполные", "ситуационные", "нет"] },
+      { kind: "chips", prefix: "c_ejac", label: "Эякуляция", opts: ["ПЭ", "норма", "задержка", "нет"] },
+      { kind: "text", id: "c_m_note", label: "Уточнение", area: true },
+    ],
+  },
+  {
+    id: "couple_f",
+    title: "Симптом у неё",
+    sex: "c",
+    domains: ["f_symptom"],
+    items: [
+      { kind: "chips", prefix: "c_lub", label: "Смазка", opts: ["достаточная", "низкая", "исчезает", "нет"] },
+      { kind: "chips", prefix: "c_pain", label: "Боль / спазм", opts: ["нет", "на входе", "глубокая", "избегание"] },
+      { kind: "text", id: "c_f_note", label: "Уточнение", area: true },
+    ],
+  },
+  {
+    id: "couple_conflict",
+    title: "Конфликт и коммуникация",
+    sex: "c",
+    domains: ["conflict", "sex_script"],
+    items: [
+      { kind: "chips", prefix: "talk_sex", label: "Говорят о сексе", opts: ["свободно", "редко", "только в ссоре", "не говорят"] },
+      { kind: "chips", prefix: "blame", label: "Кто «виноват» в их картине", opts: ["он", "она", "оба", "обстоятельства"] },
+      { kind: "text", id: "conflict_note", label: "Динамика", area: true },
+    ],
+  },
+  {
+    id: "couple_cond",
+    title: "Условия близости",
+    sex: "c",
+    domains: ["conditions"],
+    items: [
+      { kind: "chips", prefix: "cond_bad", label: "Помехи", opts: ["нет изоляции", "дети / родственники", "нет звукоизоляции", "раздельная постель", "неудобное время"] },
+      { kind: "text", id: "cond_ok", label: "Когда получается лучше", area: true },
+    ],
+  },
 ];
 
 export function activeModules(sex, domains, refinements) {
-  const sexKey = sex === "f" ? "f" : "m";
+  const sexKey = sex === "f" ? "f" : sex === "c" ? "c" : "m";
   const dSet = new Set(domains);
   const rSet = new Set(refinements);
   return MODULES.filter((m) => {
     if (m.sex && m.sex !== sexKey) return false;
-    if (m.always) return true;
+    // couple-only modules must not leak into m/f
+    if (!m.sex && sexKey === "c" && m.domains && !m.always) {
+      // allow shared modules that match couple domains
+      return m.domains.some((d) => dSet.has(d));
+    }
+    if (m.always) {
+      if (sexKey === "c" && m.id === "frame") return true;
+      if (sexKey !== "c") return true;
+      return m.id === "frame";
+    }
     if (!dSet.size) return false;
     if (m.refinements?.length) {
       const domainOk = !m.domains || m.domains.some((d) => dSet.has(d));

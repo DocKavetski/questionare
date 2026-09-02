@@ -26,7 +26,7 @@ export function emptyCase() {
   return {
     id: uid(),
     createdAt: today(),
-    patient: { name: "", age: "", cardNo: "", sex: null },
+    patient: { name: "", name2: "", age: "", age2: "", cardNo: "", sex: null },
     visits: [visit],
     activeVisitId: visit.id,
   };
@@ -38,7 +38,11 @@ function load() {
     if (!raw) return emptyCase();
     const data = JSON.parse(raw);
     if (!data.patient || !Array.isArray(data.visits) || !data.visits.length) return emptyCase();
-    return data;
+    return {
+      ...emptyCase(),
+      ...data,
+      patient: { ...emptyCase().patient, ...data.patient },
+    };
   } catch {
     return emptyCase();
   }

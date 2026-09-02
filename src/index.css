@@ -110,6 +110,9 @@ button { cursor: pointer; }
   justify-content: center;
   position: relative;
 }
+.gate-choices-3 {
+  grid-template-columns: repeat(3, minmax(0, 240px));
+}
 .gate-choice {
   border: 1px solid transparent;
   border-radius: 22px;
@@ -142,10 +145,20 @@ button { cursor: pointer; }
 }
 .gate-f .gate-choice-title { font-family: "Fraunces", Georgia, serif; font-weight: 600; }
 .gate-f .gate-choice-kicker, .gate-f .gate-choice-sub { font-family: "Syne", sans-serif; }
+.gate-c {
+  background: linear-gradient(160deg, #1c2420, #3d6b5a);
+  color: #f4f7f5;
+  box-shadow: 0 24px 50px rgba(28,36,32,.28);
+}
+.gate-c .gate-choice-title { font-family: "Fraunces", Georgia, serif; font-weight: 600; }
+.gate-c .gate-choice-kicker, .gate-c .gate-choice-sub { font-family: "DM Sans", sans-serif; }
 .gate-foot {
   text-align: center; margin-top: 28px; font-size: 12.5px; color: #6b6258; position: relative;
 }
 
+@media (max-width: 900px) {
+  .gate-choices-3 { grid-template-columns: 1fr; max-width: 320px; margin: 0 auto; }
+}
 @media (max-width: 640px) {
   .gate-choices { grid-template-columns: 1fr; max-width: 320px; margin: 0 auto; }
 }
@@ -171,7 +184,27 @@ button { cursor: pointer; }
   font-family: var(--display);
   font-size: 24px; font-weight: 600; display: block; line-height: 1;
 }
+/* —— Couple —— */
+.theme-c {
+  --bg: #efece4;
+  --bg-deep: #1c2420;
+  --ink: #1a1f1c;
+  --muted: #5f6a62;
+  --line: #d4d0c4;
+  --surface: #faf8f3;
+  --accent: #3d6b5a;
+  --accent-2: #24483c;
+  --accent-soft: #dceae3;
+  --warn: #8a3b32;
+  --warn-bg: #f6e8e6;
+  --ok: #2a6b52;
+  --display: "Fraunces", Georgia, serif;
+  --body: "DM Sans", "Segoe UI", sans-serif;
+  --topbar: linear-gradient(105deg, #1c2420 0%, #2f4a3e 55%, #3d6b5a 120%);
+}
+
 .theme-m .brand span { font-weight: 500; }
+.theme-c .brand span { font-weight: 600; }
 .brand small {
   display: block; font-family: var(--body); font-size: 11px;
   letter-spacing: .08em; text-transform: uppercase; opacity: .72; margin-top: 3px;
@@ -365,7 +398,7 @@ input.mini { width: 92px; display: inline-block; }
   body[data-print-scale="pedt"] .scale-card[data-scale="pedt"],
   body[data-print-scale="fsfi6"] .scale-card[data-scale="fsfi6"],
   body[data-print-scale="asex"] .scale-card[data-scale="asex"],
-  body[data-print-scale="phq2"] .scale-card[data-scale="phq2"] {
+  body[data-print-scale="couple5"] .scale-card[data-scale="couple5"] {
     display: block !important;
   }
 }

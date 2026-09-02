@@ -113,7 +113,7 @@ export const SCALES = [
     id: "phq2",
     title: "PHQ-2",
     short: "Депрессия",
-    domains: ["desire", "iatrogenic"],
+    domains: ["desire", "iatrogenic", "conflict"],
     min: 0,
     max: 3,
     items: [
@@ -132,15 +132,45 @@ export const SCALES = [
       };
     },
   },
+  {
+    id: "couple5",
+    title: "Пара · клиническая оценка",
+    short: "Диада",
+    sex: "c",
+    domains: ["who", "desire_gap", "conflict", "sex_script", "conditions"],
+    min: 1,
+    max: 5,
+    items: [
+      { id: "c5_sat", label: "Удовлетворённость сексом в паре" },
+      { id: "c5_talk", label: "Возможность говорить о сексе" },
+      { id: "c5_desire", label: "Согласованность желания" },
+      { id: "c5_safe", label: "Безопасность / доверие в близости" },
+      { id: "c5_hope", label: "Надежда на изменение" },
+    ],
+    score(values) {
+      const nums = this.items.map((i) => Number(values[i.id]) || 0);
+      if (nums.some((n) => n < 1)) return null;
+      const total = nums.reduce((a, b) => a + b, 0);
+      let grade = "ресурс есть";
+      if (total <= 12) grade = "высокий дистресс пары";
+      else if (total <= 18) grade = "умеренный дистресс";
+      return { total, grade, line: `Пара-5: ${total}/25 · ${grade}` };
+    },
+  },
 ];
 
 export function recommendedScales(sex, domains, refinements) {
-  const sexKey = sex === "f" ? "f" : "m";
+  const sexKey = sex === "f" ? "f" : sex === "c" ? "c" : "m";
   const dSet = new Set(domains);
   const rSet = new Set(refinements);
   if (!dSet.size) return [];
   return SCALES.filter((s) => {
     if (s.sex && s.sex !== sexKey) return false;
+    if (sexKey === "c" && s.sex !== "c" && s.id !== "phq2" && s.id !== "asex") {
+      // only couple scale + shared screens for couples by default
+      if (s.id === "phq2" || s.id === "asex") return s.domains?.some((d) => dSet.has(d));
+      return false;
+    }
     if (s.domains?.some((d) => dSet.has(d))) return true;
     if (s.refinements?.some((r) => rSet.has(r))) return true;
     return false;

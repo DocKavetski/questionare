@@ -15,8 +15,8 @@ export default function TabSymptoms() {
         <p>Два уровня: домен, затем уточнение. От выбора зависит интервью и опросники.</p>
       </header>
 
-      <Field label="Жалоба словами пациента">
-        <Text id="complaint" area placeholder="Что не так с сексом / парой / телом" />
+      <Field label={sex === "c" ? "Общая жалоба пары" : "Жалоба словами пациента"}>
+        <Text id="complaint" area placeholder={sex === "c" ? "Что не так между вами / с сексом" : "Что не так с сексом / парой / телом"} />
       </Field>
 
       <div className="domain-grid">

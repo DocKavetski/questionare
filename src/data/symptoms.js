@@ -18,6 +18,16 @@ export const DOMAINS = {
     { id: "partner", label: "Пара", hint: "отношения, конфликт" },
     { id: "iatrogenic", label: "Ятрогенное", hint: "АД, КОК" },
   ],
+  c: [
+    { id: "who", label: "Кто с запросом", hint: "он / она / оба" },
+    { id: "desire_gap", label: "Расхождение желания", hint: "кто хочет чаще" },
+    { id: "m_symptom", label: "Симптом у него", hint: "эрекция, ПЭ, желание" },
+    { id: "f_symptom", label: "Симптом у неё", hint: "желание, смазка, боль" },
+    { id: "conflict", label: "Конфликт", hint: "упрёки, давление, избегание" },
+    { id: "sex_script", label: "Сценарий секса", hint: "ласки, позиции, скука" },
+    { id: "conditions", label: "Условия", hint: "дом, дети, время" },
+    { id: "iatrogenic", label: "Ятрогенное", hint: "АД / КОК у кого-то" },
+  ],
 };
 
 export const REFINEMENTS = {
@@ -69,10 +79,54 @@ export const REFINEMENTS = {
     { id: "other_meds", label: "другие препараты" },
     { id: "after_start", label: "началось после препарата" },
   ],
+  who: [
+    { id: "him", label: "он пришёл с запросом" },
+    { id: "her", label: "она с запросом" },
+    { id: "both", label: "оба" },
+    { id: "pressured", label: "один под давлением" },
+  ],
+  desire_gap: [
+    { id: "he_higher", label: "он хочет чаще" },
+    { id: "she_higher", label: "она хочет чаще" },
+    { id: "both_low", label: "оба низко" },
+    { id: "mismatch_timing", label: "разный ритм / время" },
+  ],
+  m_symptom: [
+    { id: "m_ed", label: "эрекция" },
+    { id: "m_pe", label: "ПЭ" },
+    { id: "m_desire", label: "желание ↓" },
+    { id: "m_orgasm", label: "оргазм" },
+  ],
+  f_symptom: [
+    { id: "f_desire", label: "желание ↓" },
+    { id: "f_lub", label: "смазка" },
+    { id: "f_orgasm", label: "оргазм" },
+    { id: "f_pain", label: "боль / спазм" },
+  ],
+  conflict: [
+    { id: "blame", label: "упрёки" },
+    { id: "pressure_sex", label: "давление к сексу" },
+    { id: "avoid_touch", label: "избегание близости" },
+    { id: "affair_threat", label: "угроза изменой / уходом" },
+  ],
+  sex_script: [
+    { id: "short_fore", label: "мало ласк" },
+    { id: "stereotype", label: "стереотипный сценарий" },
+    { id: "no_talk", label: "не говорят о желаниях" },
+    { id: "porn_gap", label: "разрыв фантазий / порно" },
+  ],
+  conditions: [
+    { id: "kids", label: "дети / родственники" },
+    { id: "no_privacy", label: "нет изоляции" },
+    { id: "tired", label: "усталость / смены" },
+    { id: "separate_beds", label: "раздельная постель" },
+  ],
 };
 
 export function domainsFor(sex) {
-  return DOMAINS[sex === "f" ? "f" : "m"];
+  if (sex === "f") return DOMAINS.f;
+  if (sex === "c") return DOMAINS.c;
+  return DOMAINS.m;
 }
 
 export function refinementsFor(domainId) {
