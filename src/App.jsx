@@ -1,136 +1,58 @@
-import { useEffect, useState } from "react";
-import { useStore, setPatient, reset, isF } from "./useStore";
-import { buildSummary } from "./summary.js";
-import { cardProgress } from "./data/cardSections.js";
-import AdaptiveInterview from "./pages/AdaptiveInterview.jsx";
-import Card from "./pages/Card.jsx";
-import Temperament from "./pages/Temperament.jsx";
-import Interview from "./pages/Interview.jsx";
-import Opd from "./pages/Opd.jsx";
-import Comorbid from "./pages/Comorbid.jsx";
-import Personality, { Screen } from "./pages/Personality.jsx";
-import Handouts from "./pages/Handouts.jsx";
-import Summary from "./pages/Summary.jsx";
-
-const NAV = [
-  { g: "Приём", items: [
-    { id: "interview", t: "Интервью" },
-    { id: "summary", t: "Протокол" },
-  ]},
-  { g: "Карта", items: [
-    { id: "card", t: "Полная карта" },
-  ]},
-  { g: "Опросники", items: [
-    { id: "temp", t: "Темперамент" },
-    { id: "interview_hints", t: "Подсказки «?»" },
-    { id: "opd", t: "OPD-3" },
-    { id: "comorbid", t: "Депрессия / тревога" },
-    { id: "pd", t: "Личность F60" },
-    { id: "screen", t: "Скрининг" },
-  ]},
-  { g: "Пациенту", items: [
-    { id: "handouts", t: "Раздатки и АД" },
-  ]},
-];
-
-function parseHash() {
-  const h = (location.hash || "#interview").slice(1);
-  if (h.startsWith("handout/")) return { view: "handouts", extra: h.split("/")[1] };
-  if (h.startsWith("card/")) return { view: "card", extra: h.split("/")[1] };
-  if (h === "card") return { view: "card", extra: null };
-  if (h === "interview_hints") return { view: "interview", extra: null };
-  return { view: h || "interview", extra: null };
-}
-
-function navActive(view, extra, id) {
-  if (id === "card") return view === "card" && !extra;
-  if (id === "interview") return view === "interview";
-  if (id === "interview_hints") return view === "interview";
-  return view === id;
-}
+import { useStore, setPatient, setSex, resetCase, newVisit, selectVisit, activeVisit, ruDate, setVisitMeta } from "./store/useStore.js";
+import SexGate from "./components/SexGate.jsx";
+import VisitShell from "./visit/VisitShell.jsx";
+import { buildProtocol } from "./lib/summary.js";
 
 export default function App() {
   const state = useStore();
-  const [{ view, extra }, setRoute] = useState(parseHash);
-  const [toast, setToast] = useState("");
-  const { firstAvg } = cardProgress(state);
+  const sex = state.patient.sex;
+  const visit = activeVisit(state);
+  const visitIndex = state.visits.findIndex((v) => v.id === visit.id) + 1;
 
-  useEffect(() => {
-    if (!location.hash) location.hash = "interview";
-    const onHash = () => setRoute(parseHash());
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, []);
+  if (!sex) return <SexGate />;
 
-  const go = (id) => {
-    location.hash = id;
-  };
-
-  const showToast = (msg) => {
-    setToast(msg);
-    setTimeout(() => setToast(""), 2200);
-  };
-
-  const copySummary = async () => {
-    try {
-      await navigator.clipboard.writeText(buildSummary(state));
-      showToast("Сводка скопирована");
-    } catch {
-      showToast("Не удалось скопировать");
-    }
-  };
-
+  const theme = sex === "f" ? "theme-f" : "theme-m";
   const p = state.patient;
-  let page = null;
-  if (view === "interview") page = <AdaptiveInterview go={go} />;
-  else if (view === "interview_hints") page = <Interview />;
-  else if (view === "card") page = <Card extra={extra} go={go} />;
-  else if (view === "temp") page = <Temperament />;
-  else if (view === "opd") page = <Opd />;
-  else if (view === "comorbid") page = <Comorbid />;
-  else if (view === "pd") page = <Personality />;
-  else if (view === "screen") page = <Screen />;
-  else if (view === "handouts") page = <Handouts extra={extra} go={go} />;
-  else if (view === "summary") page = <Summary go={go} />;
-  else page = <AdaptiveInterview go={go} />;
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(buildProtocol(state));
+    } catch { /* ignore */ }
+  };
 
   return (
-    <div className="app">
-      <header className="topbar">
-        <div className="brand">Сексология<small>{isF() ? "женщины" : "мужчины"} · адаптивное интервью</small></div>
+    <div className={"app " + theme}>
+      <header className="topbar no-print">
+        <div className="brand">
+          <span>Сексология</span>
+          <small>{sex === "f" ? "женщины" : "мужчины"} · визит {visitIndex}</small>
+        </div>
         <div className="patient-bar">
-          <select value={p.sex} onChange={(e) => setPatient({ sex: e.target.value })}>
-            <option value="m">муж.</option>
-            <option value="f">жен.</option>
-          </select>
-          <input placeholder="№ карты" value={p.cardNo} onChange={(e) => setPatient({ cardNo: e.target.value })} style={{ width: 88 }} />
+          <input placeholder="№" value={p.cardNo} onChange={(e) => setPatient({ cardNo: e.target.value })} style={{ width: 72 }} />
           <input placeholder="ФИО" value={p.name} onChange={(e) => setPatient({ name: e.target.value })} />
-          <input type="number" placeholder="лет" min="14" max="120" value={p.age} onChange={(e) => setPatient({ age: e.target.value })} />
-          <input type="date" value={p.date} onChange={(e) => setPatient({ date: e.target.value })} />
+          <input type="number" placeholder="лет" min="14" max="120" value={p.age} onChange={(e) => setPatient({ age: e.target.value })} style={{ width: 64 }} />
+          <input type="date" value={visit.date} onChange={(e) => setVisitMeta({ date: e.target.value })} style={{ width: 140 }} />
         </div>
         <div className="top-actions">
-          <span className="card-pill no-print" title="Заполнение карты">{firstAvg}%</span>
-          <button className="ghost" type="button" onClick={copySummary}>Копировать</button>
+          <select className="visit-select" value={visit.id} onChange={(e) => selectVisit(e.target.value)} title="Визиты случая">
+            {state.visits.map((v, i) => (
+              <option key={v.id} value={v.id}>Визит {i + 1} · {ruDate(v.date)}</option>
+            ))}
+          </select>
+          <button type="button" className="ghost" onClick={() => newVisit()}>+ Визит</button>
+          <button type="button" className="ghost" onClick={copy}>Копировать</button>
           <button type="button" onClick={() => window.print()}>Печать</button>
-          <button className="ghost" type="button" onClick={() => {
-            if (confirm("Новая карта? Текущие ответы сотрутся.")) reset();
-          }}>Новая</button>
+          <button type="button" className="ghost" onClick={() => {
+            if (confirm("Сменить пол профиля? Маршрут и оформление изменятся.")) setSex(sex === "f" ? "m" : "f");
+          }}>{sex === "f" ? "→ муж." : "→ жен."}</button>
+          <button type="button" className="ghost" onClick={() => {
+            if (confirm("Новый случай? Все визиты будут стёрты.")) resetCase();
+          }}>Новый</button>
         </div>
       </header>
-      <aside className="sidebar">
-        {NAV.map((g) => (
-          <div key={g.g}>
-            <div className="nav-label">{g.g}</div>
-            {g.items.map((it) => (
-              <button key={it.id} type="button" className={"nav-btn" + (navActive(view, extra, it.id) ? " active" : "")} onClick={() => go(it.id === "interview_hints" ? "interview_hints" : it.id)}>
-                {it.t}
-              </button>
-            ))}
-          </div>
-        ))}
-      </aside>
-      <main className="main"><div className="wrap" key={view + (extra || "")}>{page}</div></main>
-      <div className={"toast" + (toast ? " show" : "")}>{toast}</div>
+      <main className="main">
+        <VisitShell />
+      </main>
     </div>
   );
 }
