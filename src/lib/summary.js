@@ -12,13 +12,8 @@ export function buildProtocol(state) {
   const lines = [
     `ПРОТОКОЛ СЕКСОЛОГИЧЕСКОГО ПРИЁМА (${meta.protocol})`,
     `Дата: ${ruDate(visit.date)}  № ${p.cardNo || "—"}`,
+    `Визит: ${state.visits.findIndex((v) => v.id === visit.id) + 1} из ${state.visits.length}`,
   ];
-  if (p.sex === "c") {
-    lines.push(`Пара: ${p.name || "он —"}, ${p.age || "?"} лет · ${p.name2 || "она —"}, ${p.age2 || "?"} лет`);
-  } else {
-    lines.push(`Пациент: ${p.name || "—"}, ${p.age || "?"} лет`);
-  }
-  lines.push(`Визит: ${state.visits.findIndex((v) => v.id === visit.id) + 1} из ${state.visits.length}`);
 
   const domainLabels = domainsFor(p.sex)
     .filter((d) => visit.domains.includes(d.id))

@@ -30,19 +30,7 @@ export default function App() {
           <small>{meta.short} · визит {visitIndex}</small>
         </div>
         <div className="patient-bar">
-          <input placeholder="№" value={p.cardNo} onChange={(e) => setPatient({ cardNo: e.target.value })} style={{ width: 72 }} />
-          {couple ? (
-            <>
-              <input placeholder="Он" value={p.name} onChange={(e) => setPatient({ name: e.target.value })} />
-              <input placeholder="Она" value={p.name2 || ""} onChange={(e) => setPatient({ name2: e.target.value })} />
-            </>
-          ) : (
-            <input placeholder="ФИО" value={p.name} onChange={(e) => setPatient({ name: e.target.value })} />
-          )}
-          <input type="number" placeholder={couple ? "лет он" : "лет"} min="14" max="120" value={p.age} onChange={(e) => setPatient({ age: e.target.value })} style={{ width: 64 }} />
-          {couple ? (
-            <input type="number" placeholder="лет она" min="14" max="120" value={p.age2 || ""} onChange={(e) => setPatient({ age2: e.target.value })} style={{ width: 72 }} />
-          ) : null}
+          <input placeholder="№ карты" value={p.cardNo} onChange={(e) => setPatient({ cardNo: e.target.value })} style={{ width: 96 }} />
           <input type="date" value={visit.date} onChange={(e) => setVisitMeta({ date: e.target.value })} style={{ width: 140 }} />
         </div>
         <div className="top-actions">
