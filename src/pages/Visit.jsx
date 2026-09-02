@@ -1,7 +1,9 @@
 import { Group, Field, Text, Chips, Scale } from "../ui.jsx";
-import { useStore, f, isF, setPatient } from "../useStore";
+import { useStore, f, isF } from "../useStore";
 import { redFlags } from "../data/clinical.js";
 import { scoreTemperament, dcmAxes } from "../data/temperament.js";
+import { COME, IV_CTX, visitFocus, hasPartnerOpts, chrOpts, SUI } from "../data/fields.js";
+import { cardProgress } from "../data/cardSections.js";
 
 const STEPS = [
   { id: "who", t: "Кто пришёл" },
@@ -18,14 +20,16 @@ export default function Visit({ go }) {
   const setStep = (n) => f("_visit_step", String(Math.max(0, Math.min(STEPS.length - 1, n))));
   const female = isF();
   const flags = redFlags(state);
+  const { firstAvg } = cardProgress(state);
 
   return (
     <>
-      <h1>Сценарий первого приёма</h1>
+      <h1>Быстрый приём</h1>
       <p className="lede">
-        Пациент с сексологической проблемой. Заполняйте только то, что успели. Пустые поля — норма.
-        Пол и ФИО — в шапке. Данные остаются в этом браузере.
+        Экспресс-режим для первого визита. Ответы попадают в те же поля карты обследования ({firstAvg}% заполнено).
+        Полная работа — в разделе «Обзор карты».
       </p>
+      <p className="no-print"><button className="btn navy" type="button" onClick={() => go("card")}>Открыть карту</button></p>
       <div className="steps">
         {STEPS.map((s, i) => (
           <button key={s.id} type="button" className={"step-dot" + (i === step ? " on" : "")} onClick={() => setStep(i)} title={s.t} />
@@ -50,7 +54,7 @@ export default function Visit({ go }) {
               <button className="btn" type="button" onClick={() => setStep(step + 1)}>Дальше</button>
             </>
           ) : (
-            <button className="btn" type="button" onClick={() => go("summary")}>Открыть сводку</button>
+            <button className="btn" type="button" onClick={() => go("summary")}>Протокол</button>
           )}
         </div>
       </div>
@@ -59,22 +63,16 @@ export default function Visit({ go }) {
 }
 
 function Who({ female }) {
-  const p = useStore().patient;
   return (
     <Group title="Кто в кабинете">
-      <p className="legend">Пол уже в шапке. Здесь — кто пришёл и зачем, без биографии.</p>
+      <p className="legend">Пол, возраст и ФИО — в шапке. Здесь — кто пришёл и зачем.</p>
       <Field label="Кто пришёл">
-        <Chips prefix="come" opts={["самостоятельно", "совместно с партнёром", "по направлению", "под давлением"]} />
-      </Field>
-      <Field label="Возраст" hint="можно и в шапке">
-        <input type="number" min="14" max="120" value={p.age} onChange={(e) => setPatient({ age: e.target.value })} />
+        <Chips prefix="come" opts={COME} />
       </Field>
       <Field label="Мотивация к изменению 0–10"><Text id="mot" cls="mini" /></Field>
       <Field label="Уверенность 0–10"><Text id="conf" cls="mini" /></Field>
       <Field label="Постоянный партнёр">
-        <Chips prefix="has_p" opts={female
-          ? ["партнёра не было", "нет сейчас", "встречается", "незарегистрированный брак", "зарегистрированный брак"]
-          : ["партнёрши не было", "нет сейчас", "встречается", "незарегистрированный брак", "зарегистрированный брак"]} />
+        <Chips prefix="has_p" opts={hasPartnerOpts(female)} />
       </Field>
     </Group>
   );
@@ -88,13 +86,11 @@ function Complaint({ female }) {
           <Text id="complaint" area placeholder="Что не так с сексом / парой / телом" />
         </Field>
         <Field label="Фокус визита">
-          <Chips prefix="visit_prob" opts={female
-            ? ["желание", "любрикация", "оргазм", "боль", "спазм", "пара", "после АД", "КОК"]
-            : ["ЭД", "ПЭ", "желание", "оргазм", "боль", "пара", "после АД"]} />
+          <Chips prefix="visit_prob" opts={visitFocus(female)} />
         </Field>
         <Field label="Длительность, мес."><Text id="dur_mo" cls="mini" /></Field>
         <Field label="Контекст">
-          <Chips prefix="iv_ctx" opts={["с партнёром", "при мастурбации", "во всех ситуациях", "в стрессе/усталости", "алкоголь", "презерватив"]} />
+          <Chips prefix="iv_ctx" opts={IV_CTX} />
         </Field>
         <Field label="Последний коитус"><Text id="last_coitus" area placeholder="когда, что получилось, реакция пары" /></Field>
         <Field label="Цель визита"><Text id="goal" area placeholder="что будет «достаточно хорошо»" /></Field>
@@ -161,14 +157,12 @@ function Soma({ female }) {
       <Group title="Лекарства и соматика">
         <Field label="Лекарства"><Text id="meds" area placeholder="препарат, доза, с какого времени" /></Field>
         <Field label="Хронические">
-          <Chips prefix="chr" opts={female
-            ? ["диабет", "гипертония", "щитовидная железа", "депрессия", "тревожное расстройство", "неврология", "ССС", "гинекология"]
-            : ["диабет", "гипертония", "щитовидная железа", "депрессия", "тревожное расстройство", "неврология", "ССС", "простата"]} />
+          <Chips prefix="chr" opts={chrOpts(female)} />
         </Field>
         <Field label="Алкоголь / ПАВ"><Text id="substances" area /></Field>
       </Group>
       <Group title="Суицидальный риск">
-        <Chips prefix="sui" opts={["мыслей нет", "мысли", "замысел", "намерение"]} />
+        <Chips prefix="sui" opts={SUI} />
         <Text id="sui_note" area placeholder="если есть — подробно" />
       </Group>
     </>
@@ -240,14 +234,11 @@ function ExpressRead({ b, female }) {
 
 function Shot({ go, state, female }) {
   const fv = (id) => state.fields[id] || "";
-  const chips = (prefix, opts) => opts.filter((o) => state.checks[prefix + ":" + o]);
-  const focus = chips("visit_prob", female
-    ? ["желание", "любрикация", "оргазм", "боль", "спазм", "пара", "после АД", "КОК"]
-    : ["ЭД", "ПЭ", "желание", "оргазм", "боль", "пара", "после АД"]);
+  const focus = visitFocus(female).filter((o) => state.checks["visit_prob:" + o]);
   return (
     <>
       <div className="result-hero">
-        <h2>Что уже есть для карты</h2>
+        <h2>Что уже есть в карте</h2>
         <p>
           {state.patient.name || "без ФИО"}, {state.patient.age || "?"} лет.
           {fv("complaint") ? ` Жалоба: ${fv("complaint")}.` : " Жалоба ещё не записана."}
@@ -259,10 +250,10 @@ function Shot({ go, state, female }) {
         <Field label="План на сегодня"><Text id="plan_sex" area placeholder="секстерапия / пара / раздатка" /></Field>
       </Group>
       <div className="grid cards">
-        <div className="card click" onClick={() => go("card")}><span className="tag">карта</span><h3>Полная карта</h3><p>Бланк 21.10.2024, только нужное.</p></div>
-        <div className="card click" onClick={() => go("interview")}><span className="tag">беседа</span><h3>Интервью с ?</h3><p>Подсказки к вопросам.</p></div>
+        <div className="card click" onClick={() => go("card/struct")}><span className="tag">МКБ</span><h3>Структура и диагноз</h3><p>Коды, оси, заключение.</p></div>
+        <div className="card click" onClick={() => go("card/partner")}><span className="tag">пара</span><h3>Раздел «Пара»</h3><p>Отношения и условия коитуса.</p></div>
         <div className="card click" onClick={() => go("handouts")}><span className="tag">домой</span><h3>Раздатка</h3><p>Фокусирование, ПЭ, АД.</p></div>
-        <div className="card click" onClick={() => go("summary")}><span className="tag">протокол</span><h3>Скопировать снимок</h3><p>В амбулаторную карту.</p></div>
+        <div className="card click" onClick={() => go("summary")}><span className="tag">протокол</span><h3>Скопировать протокол</h3><p>В амбулаторную карту.</p></div>
       </div>
     </>
   );

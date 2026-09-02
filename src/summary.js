@@ -1,4 +1,5 @@
 import { redFlags, sexDx, structAxes, comorbidCodes } from "./data/clinical.js";
+import { visitFocus } from "./data/fields.js";
 import { ruDate } from "./store.js";
 
 export function buildSummary(state) {
@@ -16,9 +17,7 @@ export function buildSummary(state) {
   if (fv("complaint") || fv("iv_what")) lines.push("Жалоба: " + (fv("complaint") || fv("iv_what")));
   if (fv("problem")) lines.push("Проблема: " + fv("problem"));
   if (fv("last_coitus")) lines.push("Последний коитус: " + fv("last_coitus"));
-  const visitChips = sel("visit_prob", female
-    ? ["желание", "любрикация", "оргазм", "боль", "спазм", "пара", "после АД", "КОК"]
-    : ["ЭД", "ПЭ", "желание", "оргазм", "боль", "пара", "после АД"]);
+  const visitChips = sel("visit_prob", visitFocus(female));
   if (visitChips.length) lines.push("Фокус визита: " + visitChips.join(", "));
   if (!female) {
     const er = sel("erect_coitus", ["быстрой возбудимости", "средней", "медленной", "полные", "неполные", "неполные ослабленные", "отсутствуют"]);

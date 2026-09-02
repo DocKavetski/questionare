@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useStore, setPatient, reset, isF } from "./useStore";
 import { buildSummary } from "./summary.js";
+import { cardProgress } from "./data/cardSections.js";
 import Visit from "./pages/Visit.jsx";
 import Card from "./pages/Card.jsx";
 import Temperament from "./pages/Temperament.jsx";
@@ -12,12 +13,12 @@ import Handouts from "./pages/Handouts.jsx";
 import Summary from "./pages/Summary.jsx";
 
 const NAV = [
-  { g: "Приём", items: [
-    { id: "visit", t: "Сценарий приёма" },
-    { id: "summary", t: "Снимок" },
-  ]},
   { g: "Карта", items: [
-    { id: "card", t: "Полная карта" },
+    { id: "card", t: "Обзор карты" },
+    { id: "summary", t: "Протокол" },
+  ]},
+  { g: "Экспресс", items: [
+    { id: "visit", t: "Быстрый приём" },
   ]},
   { g: "Опросники", items: [
     { id: "temp", t: "Темперамент" },
@@ -33,19 +34,27 @@ const NAV = [
 ];
 
 function parseHash() {
-  const h = (location.hash || "#visit").slice(1);
+  const h = (location.hash || "#card").slice(1);
   if (h.startsWith("handout/")) return { view: "handouts", extra: h.split("/")[1] };
   if (h.startsWith("card/")) return { view: "card", extra: h.split("/")[1] };
-  return { view: h || "visit", extra: null };
+  if (h === "card") return { view: "card", extra: null };
+  return { view: h || "card", extra: null };
+}
+
+function navActive(view, extra, id) {
+  if (id === "card") return view === "card" && !extra;
+  if (id.startsWith("card/")) return view === "card" && extra === id.split("/")[1];
+  return view === id;
 }
 
 export default function App() {
   const state = useStore();
   const [{ view, extra }, setRoute] = useState(parseHash);
   const [toast, setToast] = useState("");
+  const { firstAvg } = cardProgress(state);
 
   useEffect(() => {
-    if (!location.hash) location.hash = "visit";
+    if (!location.hash) location.hash = "card";
     const onHash = () => setRoute(parseHash());
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
@@ -80,13 +89,13 @@ export default function App() {
   else if (view === "pd") page = <Personality />;
   else if (view === "screen") page = <Screen />;
   else if (view === "handouts") page = <Handouts extra={extra} go={go} />;
-  else if (view === "summary") page = <Summary />;
-  else page = <Visit go={go} />;
+  else if (view === "summary") page = <Summary go={go} />;
+  else page = <Card extra={extra} go={go} />;
 
   return (
     <div className="app">
       <header className="topbar">
-        <div className="brand">Сексология<small>{isF() ? "женщины" : "мужчины"} · быстрый приём</small></div>
+        <div className="brand">Сексология<small>{isF() ? "женщины" : "мужчины"} · карта обследования</small></div>
         <div className="patient-bar">
           <select value={p.sex} onChange={(e) => setPatient({ sex: e.target.value })}>
             <option value="m">муж.</option>
@@ -98,6 +107,7 @@ export default function App() {
           <input type="date" value={p.date} onChange={(e) => setPatient({ date: e.target.value })} />
         </div>
         <div className="top-actions">
+          <span className="card-pill no-print" title="Минимум первого визита">{firstAvg}%</span>
           <button className="ghost" type="button" onClick={copySummary}>Копировать</button>
           <button type="button" onClick={() => window.print()}>Печать</button>
           <button className="ghost" type="button" onClick={() => {
@@ -110,7 +120,7 @@ export default function App() {
           <div key={g.g}>
             <div className="nav-label">{g.g}</div>
             {g.items.map((it) => (
-              <button key={it.id} type="button" className={"nav-btn" + (view === it.id ? " active" : "")} onClick={() => go(it.id)}>
+              <button key={it.id} type="button" className={"nav-btn" + (navActive(view, extra, it.id) ? " active" : "")} onClick={() => go(it.id)}>
                 {it.t}
               </button>
             ))}

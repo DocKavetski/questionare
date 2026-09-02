@@ -1,40 +1,133 @@
 import { Group, Field, Text, Chips, Check } from "../ui.jsx";
 import { useStore, f, isF } from "../useStore";
 import { EZ_M, EZ_F, EZ_SCORE, EZ_DP, sexDx, structAxes, redFlags } from "../data/clinical.js";
+import { visitFocus } from "../data/fields.js";
+import {
+  CARD_SECTIONS,
+  cardProgress,
+  sectionProgress,
+  sectionIndex,
+  recommendedSections,
+} from "../data/cardSections.js";
 
-const SECS = [
-  ["pass", "Паспорт"],
-  ["problem", "Жалобы"],
-  ["function", "Функция"],
-  ["history", "Анамнез"],
-  ["soma", "Сома"],
-  ["partner", "Пара"],
-  ["ez", "ЭЗ"],
-  ["exam", "Осмотр"],
-  ["struct", "МКБ"],
-  ["plan", "План"],
-];
+function CardHub({ state, female, go, flags }) {
+  const { sections, avg, firstAvg } = cardProgress(state);
+  const rec = recommendedSections(state);
+
+  return (
+    <>
+      <div className="card-progress-hero">
+        <div>
+          <div className="progress-label">Карта обследования</div>
+          <div className="progress-pct">{firstAvg}%</div>
+          <div className="progress-sub">минимум первого визита · всего {avg}%</div>
+        </div>
+        <div className="progress-bar-wrap">
+          <div className="axis wide"><i style={{ width: firstAvg + "%" }} /></div>
+          <p className="legend">Бланк {female ? "женского" : "мужского"} пола, 21.10.2024. Заполняйте только нужные секции.</p>
+        </div>
+      </div>
+      {rec.length ? (
+        <div className="rec-box no-print">
+          <strong>Рекомендуется заполнить</strong>
+          <div className="row" style={{ marginTop: 8 }}>
+            {rec.map((s) => (
+              <button key={s.id} className="btn ghost" type="button" onClick={() => go("card/" + s.id)}>{s.title}</button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+      <div className="grid cards sec-grid">
+        {sections.map((s) => (
+          <button key={s.id} type="button" className="card click sec-card" onClick={() => go("card/" + s.id)}>
+            <span className={"tag" + (s.tier === "first" ? " tag-first" : "")}>{s.tier === "first" ? "первый визит" : "по показаниям"}</span>
+            <h3>{s.title}</h3>
+            <p>{s.desc}</p>
+            <div className="sec-card-bar"><i style={{ width: s.progress.pct + "%" }} /></div>
+            <span className="sec-card-meta">{s.progress.pct}% · {s.progress.filled}/{s.progress.total}</span>
+          </button>
+        ))}
+      </div>
+      <div className="row no-print" style={{ marginTop: 14 }}>
+        <button className="btn" type="button" onClick={() => go("summary")}>Протокол / снимок</button>
+        <button className="btn ghost" type="button" onClick={() => go("card/problem")}>Начать с жалоб</button>
+      </div>
+    </>
+  );
+}
+
+function SectionNav({ sec, setSec, state }) {
+  return (
+    <div className="sec-nav no-print">
+      <button type="button" className={!sec ? "on" : ""} onClick={() => setSec(null)}>Обзор</button>
+      {CARD_SECTIONS.map((s) => {
+        const prog = sectionProgress(state, s);
+        return (
+          <button key={s.id} type="button" className={sec === s.id ? "on" : ""} onClick={() => setSec(s.id)}>
+            {s.title}
+            <span className={"sec-dot" + (prog.pct >= 40 ? " done" : prog.pct > 0 ? " part" : "")} />
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function SectionFooter({ sec, go }) {
+  const idx = sectionIndex(sec);
+  const prev = idx > 0 ? CARD_SECTIONS[idx - 1] : null;
+  const next = idx < CARD_SECTIONS.length - 1 ? CARD_SECTIONS[idx + 1] : null;
+  return (
+    <div className="visit-nav no-print">
+      <button className="btn ghost" type="button" disabled={!prev} onClick={() => prev && go("card/" + prev.id)}>← {prev ? prev.title : "Назад"}</button>
+      <div className="row">
+        <button className="btn ghost" type="button" onClick={() => go("card")}>Обзор карты</button>
+        {next ? (
+          <button className="btn" type="button" onClick={() => go("card/" + next.id)}>{next.title} →</button>
+        ) : (
+          <button className="btn" type="button" onClick={() => go("summary")}>Протокол</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SectionTools({ section, go }) {
+  if (!section?.tools?.length) return null;
+  return (
+    <div className="tools-row no-print">
+      {section.tools.map((t) => (
+        <button key={t.id} className="btn ghost" type="button" onClick={() => go(t.id)}>{t.label}</button>
+      ))}
+    </div>
+  );
+}
 
 export default function Card({ extra, go }) {
   const state = useStore();
   const female = isF();
-  const sec = extra && SECS.some(([id]) => id === extra) ? extra : "pass";
+  const sec = extra && CARD_SECTIONS.some((s) => s.id === extra) ? extra : null;
   const flags = redFlags(state);
-  const setSec = (id) => go("card/" + id);
+  const setSec = (id) => (id ? go("card/" + id) : go("card"));
+  const current = CARD_SECTIONS.find((s) => s.id === sec);
+
+  if (!sec) {
+    return (
+      <>
+        <h1>Карта обследования</h1>
+        {flags.length ? <div className="flag">⚠ {flags.join(" · ")}</div> : null}
+        <CardHub state={state} female={female} go={go} flags={flags} />
+      </>
+    );
+  }
 
   return (
     <>
-      <h1>Карта обследования</h1>
-      <p className="lede">
-        Бланк {female ? "женского" : "мужского"} пола от 21.10.2024. Принцип: только необходимое для диагноза, без ятрогении.
-        {female ? " Три составляющие цикла." : " Четыре составляющие цикла."}
-      </p>
+      <h1>{current?.title || "Карта"}</h1>
+      <p className="lede">{current?.desc}. Принцип: только необходимое для диагноза, без ятрогении.</p>
       {flags.length ? <div className="flag">⚠ {flags.join(" · ")}</div> : null}
-      <div className="sec-nav no-print">
-        {SECS.map(([id, t]) => (
-          <button key={id} type="button" className={sec === id ? "on" : ""} onClick={() => setSec(id)}>{t}</button>
-        ))}
-      </div>
+      <SectionNav sec={sec} setSec={setSec} state={state} />
+      <SectionTools section={current} go={go} />
       {sec === "pass" && <Pass female={female} />}
       {sec === "problem" && <Problem />}
       {sec === "function" && <FunctionBlock female={female} />}
@@ -45,6 +138,7 @@ export default function Card({ extra, go }) {
       {sec === "exam" && <Exam female={female} />}
       {sec === "struct" && <Struct female={female} go={go} />}
       {sec === "plan" && <Plan female={female} go={go} />}
+      <SectionFooter sec={sec} go={go} />
     </>
   );
 }
@@ -89,11 +183,16 @@ function Pass({ female }) {
 }
 
 function Problem() {
+  const female = isF();
   return (
     <>
       <Group title="Жалобы">
         <p className="legend">Партнёрские, сексуальные, эмоциональные, поведенческие и соматические.</p>
         <Text id="complaint" area />
+      </Group>
+      <Group title="Фокус и контекст">
+        <Field label="Фокус визита"><Chips prefix="visit_prob" opts={visitFocus(female)} /></Field>
+        <Field label="Длительность симптомов, мес."><Text id="dur_mo" cls="mini" /></Field>
       </Group>
       <Group title="Исследование сексуальной проблемы">
         <p className="legend">Первая мысль / первый неудачный коитус, реакция каждого, динамика, ранее лечение.</p>
