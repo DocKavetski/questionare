@@ -29,7 +29,6 @@ export default function App() {
           <small>{meta.short} · визит {visitIndex}</small>
         </div>
         <div className="patient-bar">
-          <input placeholder="№ карты" value={p.cardNo} onChange={(e) => setPatient({ cardNo: e.target.value })} style={{ width: 96 }} />
           <input type="date" value={visit.date} onChange={(e) => setVisitMeta({ date: e.target.value })} style={{ width: 140 }} />
         </div>
         <div className="top-actions">

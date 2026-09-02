@@ -11,7 +11,7 @@ export function buildProtocol(state) {
   const fv = (id) => visit.fields[id] || "";
   const lines = [
     `ПРОТОКОЛ СЕКСОЛОГИЧЕСКОГО ПРИЁМА (${meta.protocol})`,
-    `Дата: ${ruDate(visit.date)}  № ${p.cardNo || "—"}`,
+    `Дата: ${ruDate(visit.date)}`,
     `Визит: ${state.visits.findIndex((v) => v.id === visit.id) + 1} из ${state.visits.length}`,
   ];
 
