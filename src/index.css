@@ -380,6 +380,88 @@ input.mini { width: 92px; display: inline-block; }
 }
 .row { display: flex; gap: 8px; flex-wrap: wrap; }
 
+/* Dual Control cheat sheet */
+.dcm-cheat {
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+.dcm-cheat-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 0;
+  background: var(--accent-soft);
+  color: var(--accent-2);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 13.5px;
+}
+.dcm-cheat-arrow { font-size: 18px; line-height: 1; opacity: .7; }
+.dcm-cheat-body { margin-top: 12px; }
+.dcm-lead {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.dcm-axes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.dcm-axis {
+  background: color-mix(in srgb, var(--surface) 70%, var(--accent-soft));
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+}
+.dcm-axis.hot { border-color: var(--accent); }
+.dcm-axis header {
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.dcm-code {
+  font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+  font-weight: 700; color: var(--accent);
+}
+.dcm-axis strong { font-size: 13px; }
+.dcm-val {
+  margin-left: auto;
+  font-family: var(--display);
+  font-size: 22px;
+  color: var(--accent-2);
+}
+.dcm-axis p { font-size: 12.5px; line-height: 1.4; color: var(--muted); margin-bottom: 8px; }
+.dcm-axis ul { list-style: none; display: grid; gap: 6px; }
+.dcm-axis li {
+  font-size: 12px; line-height: 1.4;
+  display: grid; grid-template-columns: 16px 1fr; gap: 6px;
+}
+.dcm-axis li span { font-weight: 700; color: var(--accent); }
+.dcm-tips, .dcm-map {
+  background: var(--accent-soft);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-top: 10px;
+}
+.dcm-tips h4, .dcm-map h4 {
+  font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--accent-2); margin-bottom: 8px;
+}
+.dcm-tip { margin-bottom: 8px; }
+.dcm-tip:last-child { margin-bottom: 0; }
+.dcm-tip strong { display: block; font-size: 13.5px; margin-bottom: 2px; }
+.dcm-tip p, .dcm-map li { font-size: 13px; line-height: 1.45; color: var(--ink); }
+.dcm-map ul { list-style: none; display: grid; gap: 6px; }
+
+@media (max-width: 800px) {
+  .dcm-axes { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 800px) {
   .tabs { grid-template-columns: repeat(2, 1fr); }
   .topbar { align-items: flex-start; }

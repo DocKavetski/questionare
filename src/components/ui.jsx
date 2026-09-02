@@ -1,3 +1,4 @@
+import DualControlCheat from "./DualControlCheat.jsx";
 import { useStore, f, chk } from "../store/useStore.js";
 
 export function Field({ label, hint, children }) {
@@ -62,6 +63,11 @@ export function ModuleBlock({ module, sex }) {
   return (
     <section className="block rise">
       <h3>{module.title}</h3>
+      {module.id === "dual" ? (
+        <p className="hint" style={{ marginBottom: 10 }}>
+          Клиническая оценка склонности 1–4. Не валидированный опросник — гипотеза механизма.
+        </p>
+      ) : null}
       {items.map((item) => {
         if (item.kind === "text") {
           return (
@@ -86,6 +92,7 @@ export function ModuleBlock({ module, sex }) {
         }
         return null;
       })}
+      {module.id === "dual" ? <DualControlCheat /> : null}
     </section>
   );
 }

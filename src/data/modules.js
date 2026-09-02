@@ -111,11 +111,11 @@ export const MODULES = [
   {
     id: "dual",
     title: "Dual Control",
-    domains: ["erection", "ejaculation", "arousal", "desire"],
+    domains: ["erection", "ejaculation", "arousal", "desire", "desire_gap", "m_symptom"],
     items: [
-      { kind: "scale", id: "dcm_ses", label: "SES — возбуждение / драйв", max: 4 },
-      { kind: "scale", id: "dcm_sis1", label: "SIS1 — торможение неудачи", max: 4 },
-      { kind: "scale", id: "dcm_sis2", label: "SIS2 — торможение последствий", max: 4 },
+      { kind: "scale", id: "dcm_ses", label: "SES — газ (возбуждение / драйв)", max: 4 },
+      { kind: "scale", id: "dcm_sis1", label: "SIS1 — тормоз неудачи", max: 4 },
+      { kind: "scale", id: "dcm_sis2", label: "SIS2 — тормоз последствий", max: 4 },
     ],
   },
   {
