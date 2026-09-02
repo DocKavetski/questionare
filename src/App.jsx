@@ -14,7 +14,6 @@ export default function App() {
 
   const meta = profileMeta(sex);
   const p = state.patient;
-  const couple = sex === "c";
 
   const copy = async () => {
     try {
